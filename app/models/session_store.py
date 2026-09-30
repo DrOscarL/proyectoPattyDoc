@@ -26,6 +26,13 @@ CREATE TABLE IF NOT EXISTS observations (
     postura_correcta INTEGER,
     hombros_visibles INTEGER,
     repeticiones INTEGER,
+    tiempo_total_s REAL DEFAULT 0,
+    tiempo_valido_s REAL DEFAULT 0,
+    objetivo_tiempo_s REAL DEFAULT 0,
+    cumplimiento_postural REAL DEFAULT 0,
+    correcciones INTEGER DEFAULT 0,
+    angulo_corporal_deg REAL DEFAULT 0,
+    error_postural_deg REAL DEFAULT 0,
     level TEXT,
     message_es TEXT,
     siguiente_paso TEXT,
@@ -35,6 +42,16 @@ CREATE TABLE IF NOT EXISTS observations (
 CREATE INDEX IF NOT EXISTS idx_observations_session
 ON observations (session_id);
 """
+
+OBSERVATION_COLUMNS = {
+    "tiempo_total_s": "REAL DEFAULT 0",
+    "tiempo_valido_s": "REAL DEFAULT 0",
+    "objetivo_tiempo_s": "REAL DEFAULT 0",
+    "cumplimiento_postural": "REAL DEFAULT 0",
+    "correcciones": "INTEGER DEFAULT 0",
+    "angulo_corporal_deg": "REAL DEFAULT 0",
+    "error_postural_deg": "REAL DEFAULT 0",
+}
 
 
 def _now() -> str:
@@ -56,6 +73,13 @@ class SessionStore:
     def _init_db(self):
         with self._lock, self._connect() as conn:
             conn.executescript(SCHEMA)
+            existing = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(observations)").fetchall()
+            }
+            for name, ddl in OBSERVATION_COLUMNS.items():
+                if name not in existing:
+                    conn.execute(f"ALTER TABLE observations ADD COLUMN {name} {ddl}")
 
     def create_session(self, plan: dict) -> dict:
         session_id = uuid.uuid4().hex
@@ -98,20 +122,17 @@ class SessionStore:
             )
         return cur.rowcount > 0
 
-    def add_observation(
-        self,
-        session_id: str,
-        obs: dict,
-        correction: dict,
-    ):
+    def add_observation(self, session_id: str, obs: dict, correction: dict):
         with self._lock, self._connect() as conn:
             conn.execute(
                 """
                 INSERT INTO observations (
                     session_id, exercise, frame_ts, fase, desplazamiento_y,
                     postura_correcta, hombros_visibles, repeticiones,
-                    level, message_es, siguiente_paso, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    tiempo_total_s, tiempo_valido_s, objetivo_tiempo_s,
+                    cumplimiento_postural, correcciones, angulo_corporal_deg,
+                    error_postural_deg, level, message_es, siguiente_paso, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     session_id,
@@ -122,6 +143,13 @@ class SessionStore:
                     int(obs.get("postura_correcta", True)),
                     int(obs.get("hombros_visibles", False)),
                     obs.get("repeticiones"),
+                    obs.get("tiempo_total_s", 0.0),
+                    obs.get("tiempo_valido_s", 0.0),
+                    obs.get("objetivo_tiempo_s", 0.0),
+                    obs.get("cumplimiento_postural", 0.0),
+                    obs.get("correcciones", 0),
+                    obs.get("angulo_corporal_deg", 0.0),
+                    obs.get("error_postural_deg", 0.0),
                     correction.get("level"),
                     correction.get("message_es"),
                     correction.get("siguiente_paso"),
