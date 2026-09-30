@@ -37,6 +37,13 @@ class ObservationRequest(BaseModel):
     rep_valid: bool = False
     rep_rejected: bool = False
     rep_rejection_reason: str = ""
+    tiempo_total_s: float = Field(default=0.0, ge=0)
+    tiempo_valido_s: float = Field(default=0.0, ge=0)
+    objetivo_tiempo_s: float = Field(default=0.0, ge=0)
+    cumplimiento_postural: float = Field(default=0.0, ge=0, le=1)
+    correcciones: int = Field(default=0, ge=0)
+    angulo_corporal_deg: float = Field(default=0.0, ge=0, le=180)
+    error_postural_deg: float = Field(default=0.0, ge=0, le=180)
 
 
 class CorrectionResponse(BaseModel):
