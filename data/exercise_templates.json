@@ -13,5 +13,34 @@
       "hombros_no_visibles": "Colócate frente a la cámara para que pueda ver tus hombros",
       "completado": "¡Sentadillas completadas! Meta: {objetivo} repeticiones"
     }
+  },
+  "Sentadilla isométrica": {
+    "mecanica": "isometric_squat",
+    "duracion_objetivo_s": 30,
+    "descenso_min_m": 0.28,
+    "descenso_max_m": 0.42,
+    "tolerancia_hombros_deg": 10,
+    "mensajes": {
+      "ok": "Mantén la posición. Tiempo válido: {valid_time:.1f}/{objetivo:.0f} s",
+      "postura": "Corrige la postura y mantén los hombros nivelados",
+      "muy_alta": "Baja un poco más y mantén la posición",
+      "muy_baja": "Sube ligeramente y mantén la posición",
+      "hombros_no_visibles": "Colócate frente a la cámara para que pueda ver las etiquetas 0 y 1",
+      "completado": "¡Sentadilla isométrica completada! Tiempo válido: {objetivo:.0f} s"
+    }
+  },
+  "Plancha": {
+    "mecanica": "plank",
+    "duracion_objetivo_s": 30,
+    "tolerancia_alineacion_deg": 15,
+    "tag_hombro": 2,
+    "tag_cadera": 3,
+    "tag_tobillo": 4,
+    "mensajes": {
+      "ok": "Mantén la alineación. Tiempo válido: {valid_time:.1f}/{objetivo:.0f} s",
+      "postura": "Alinea hombro, cadera y tobillo",
+      "tags_no_visibles": "La plancha requiere visibles las etiquetas laterales 2, 3 y 4",
+      "completado": "¡Plancha completada! Tiempo válido: {objetivo:.0f} s"
+    }
   }
 }
